@@ -11,4 +11,7 @@ $./falength ref.fa.gz
 
 $./falength ref.fa
 5	ref
+
+$ldd falength
+	statically linked
 ```
