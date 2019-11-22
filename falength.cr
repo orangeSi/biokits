@@ -6,13 +6,17 @@ require "gzip"
 class FaLen < Admiral::Command
 	define_argument fa,
 		description: "genome.fa or genome.fa.gz",
-		required: true
+		required: false
 	define_help description: "A command for ouput sequence length for fasta format file\nAuthor: ilikeorangeapple@gmail.com. 2019"
 	define_version "1.0.0"
 
 	def run
 		self.help_when_no_output # when no --help will output help info
-		fafile = arguments.fa
+		if ARGV.size == 1 && ARGV[0] == "-"
+			self.readfasta("", file_type: "stdin")
+			exit(0)
+		end
+		fafile = arguments.fa || ""
 		if fafile.match(/\.fa$/) || fafile.match(/\.fasta$/) || fafile.match(/\.fna$/)
 			self.readfasta(fafile, file_type: "fasta") 
 		elsif fafile.match(/\.gz$/)
@@ -24,11 +28,16 @@ class FaLen < Admiral::Command
 	end
 
 	def readfasta(file : String, file_type = "fasta")
-		raise "error: --ref #{file} not exists" if ! File.exists?(file)
+		self.exit "error: --ref #{file} not exists" if file != ""  && ! File.exists?(file)
 		#puts "file_type is #{file_type}"
 		id,  seqlen = "", 0
 		if file_type == "fasta"
 			File.each_line(file) do |line|
+				id, seqlen = self.readline(line, id, seqlen)
+			end
+			id, seqlen = self.readline(">", id, seqlen)
+		elsif file_type == "stdin"
+			STDIN.each_line do |line|
 				id, seqlen = self.readline(line, id, seqlen)
 			end
 			id, seqlen = self.readline(">", id, seqlen)
@@ -64,6 +73,10 @@ class FaLen < Admiral::Command
 			#exit 1
 			FaLen.run "--help"
 		end
+	end
+	def exit(content : String, status : Int32 = 1)
+		puts content
+		exit(status)
 	end
 
 
