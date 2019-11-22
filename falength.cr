@@ -7,18 +7,19 @@ class FaLen < Admiral::Command
 	define_argument fa,
 		description: "genome.fa or genome.fa.gz",
 		required: true
-	define_help description: "A command for ouput sequence length for fasta format file"
+	define_help description: "A command for ouput sequence length for fasta format file\nAuthor: ilikeorangeapple@gmail.com. 2019"
 	define_version "1.0.0"
 
 	def run
 		self.help_when_no_output # when no --help will output help info
 		fafile = arguments.fa
-		if fafile.match(/\.fa$/) || fafile.match(/\.fasta$/) 
+		if fafile.match(/\.fa$/) || fafile.match(/\.fasta$/) || fafile.match(/\.fna$/)
 			self.readfasta(fafile, file_type: "fasta") 
 		elsif fafile.match(/\.gz$/)
 			self.readfasta(fafile, file_type: "fasta_gz")
 		else
-			raise "error: not support #{fafile}, only fa/fasta/gz\n"
+			puts "error: not support #{fafile}, only fa/fasta/fna/gz\n"
+			exit(1)
 		end
 	end
 
@@ -58,9 +59,10 @@ class FaLen < Admiral::Command
 	end
 	def help_when_no_output
 		if ARGV.size == 0
-			app = __FILE__.gsub(/\.cr$/, "")
-			puts `#{app} --help`
-			exit 1
+			#app = __FILE__.gsub(/\.cr$/, "")
+			#puts `#{app} --help`
+			#exit 1
+			FaLen.run "--help"
 		end
 	end
 
