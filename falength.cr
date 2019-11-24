@@ -28,26 +28,29 @@ class FaLen < Admiral::Command
 	end
 
 	def readfasta(file : String, file_type = "fasta")
+		id,  seqlen = "", 0
+		self.yieldfasta(file, file_type) do |line|
+			id, seqlen = self.readline(line, id, seqlen)
+		end
+		id, seqlen = self.readline(">", id, seqlen)
+	end
+	def yieldfasta(file : String, file_type = "fasta", &block)
 		self.exit "error: --ref #{file} not exists" if file != ""  && ! File.exists?(file)
 		#puts "file_type is #{file_type}"
-		id,  seqlen = "", 0
 		if file_type == "fasta"
 			File.each_line(file) do |line|
-				id, seqlen = self.readline(line, id, seqlen)
+				yield line
 			end
-			id, seqlen = self.readline(">", id, seqlen)
 		elsif file_type == "stdin"
 			STDIN.each_line do |line|
-				id, seqlen = self.readline(line, id, seqlen)
+				yield line
 			end
-			id, seqlen = self.readline(">", id, seqlen)
 		elsif file_type == "fasta_gz"
 			Gzip::Reader.open(file) do |gfile|
 				gfile.each_line do |line|
-					id, seqlen  = self.readline(line, id, seqlen)
+					yield line
 				end
 			end
-			id, seqlen = self.readline(">", id, seqlen)
 		else
 			raise "error: not support file_type=#{file_type}, only len or fasta"
 		end
