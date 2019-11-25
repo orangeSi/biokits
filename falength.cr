@@ -65,7 +65,7 @@ class FaLen < Admiral::Command
 			id = line
 			seqlen = 0
 		else
-			seqlen += line.gsub(/\s/, "").size
+			seqlen += line.strip.size
 		end
 		return id, seqlen
 	end
