@@ -1,6 +1,6 @@
 ## biokits
 
-### falength: output every sequence length for fasta format file
+### fxlength: output every sequence length for fasta/fastq format file
 ```
 $cat ref.fa
 >c1
@@ -8,18 +8,43 @@ ATCGA
 >c2
 ATCG
 
-$./falength ref.fa.gz
+$zcat ref.fa.gz
+>c1
+ATCGA
+>c2
+ATCG
+
+$zcat demo.fq.gz
+@fqid1
+ATCG
++
+9999
+@fqid2
+ATCGC
++
+99999
+
+$./fxlength demo.fq.gz
+4	fqid1
+5	fqid2
+$./fxlength ref.fa
+5	c1
+4	c2
+$./fxlength ref.fa.gz
 5	c1
 4	c2
 
-$./falength ref.fa
+$zcat ref.fa.gz|./fxlength -
+5	c1
+4	c2
+$zcat demo.fq.gz|./fxlength -
+4	fqid1
+5	fqid2
+$cat ref.fa|./fxlength -
 5	c1
 4	c2
 
-# read data from stdin by pipe
-$head -2 ref.fa|./falength -
-5	c1
 
-$ldd falength
-	statically linked
+$ldd fxlength
+	not a dynamic executable
 ```
