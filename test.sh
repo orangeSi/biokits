@@ -7,6 +7,6 @@ zcat demo.fq.gz
 ./fxlength ref.fa
 ./fxlength ref.fa.gz
 
-zcat ref.fa.gz|./fxlength -
 zcat demo.fq.gz|./fxlength -
 cat ref.fa|./fxlength -
+zcat ref.fa.gz|./fxlength -

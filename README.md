@@ -34,13 +34,13 @@ $./fxlength ref.fa.gz
 5	c1
 4	c2
 
-$zcat ref.fa.gz|./fxlength -
-5	c1
-4	c2
 $zcat demo.fq.gz|./fxlength -
 4	fqid1
 5	fqid2
 $cat ref.fa|./fxlength -
+5	c1
+4	c2
+$zcat ref.fa.gz|./fxlength -
 5	c1
 4	c2
 
