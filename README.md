@@ -1,6 +1,6 @@
 ## biokits
 
-### fxlength: output every sequence length for fasta/fastq format file
+### fxlength: output every sequence length for fasta/fastq format file or stdin
 ```
 $cat ref.fa
 >c1
