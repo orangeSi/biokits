@@ -26,23 +26,35 @@ class FaLen < Admiral::Command
 		elsif fafile.match(/\.fq.gz$/) || fafile.match(/\.fastq.gz$/)
 			self.readfasta(fafile, file_type: "fastq_gz")
 		else
-			myexit("error: not support #{fafile}, only fa/fasta/fna/gz\n", 1)
+			#self.exit("error: not support #{fafile}, only fa/fasta/fna/gz\n", 1)
+			raise("error: not support #{fafile}, only fa/fasta/fna/gz\n")
 		end
 	end
 
 
 	def readfasta(file : String, file_type = "fasta")
 		id,  seqlen = "", 0
-		self.yieldfasta(file, file_type) do |line|
-			id, seqlen = self.readline(line, id, seqlen)
+		if file_type == "fasta" || file_type == "fasta_gz"
+			self.yieldfastx(file, file_type) do |line|
+				id, seqlen = self.readfaline(line, id, seqlen)
+			end
+			id, seqlen = self.readfaline(">", id, seqlen)
+		elsif file_type == "fastq" || file_type == "fastq_gz"
+			line_num = 0
+			self.yieldfastx(file, file_type) do |line|
+				line_num +=1
+				id, line_num = self.readfqline(line, id, line_num)
+			end
+		else
+			#self.exit("error: only support fasta or fastq", 1)
+			raise("error: only support fasta or fastq")
+
 		end
-		id, seqlen = self.readline(">", id, seqlen)
 	end
 
 
-	def yieldfasta(file : String, file_type = "fasta", &block)
-		myexit "error: --ref #{file} not exists" if file != ""  && ! File.exists?(file)
-		#puts "file_type is #{file_type}"
+	def yieldfastx(file : String, file_type = "fasta", &block)
+		raise("error: --ref #{file} not exists") if file != ""  && ! File.exists?(file)
 		if file_type == "fasta"
 			File.each_line(file) do |line|
 				yield line
@@ -58,31 +70,21 @@ class FaLen < Admiral::Command
 				end
 			end
 		elsif file_type == "fastq"
-			i = 0
 			File.each_line(file) do |line|
-				i +=1
-				if i%4 == 1 || i%4 == 2
+				yield line
+			end
+		elsif file_type == "fastq_gz"
+			Gzip::Reader.open(file) do |gfile|
+				gfile.each_line do |line|
 					yield line
 				end
 			end
-			i = 0
-		elsif file_type == "fastq_gz"
-			i = 0
-			Gzip::Reader.open(file) do |gfile|
-				gfile.each_line do |line|
-					i +=1
-					if i%4 == 1 || i%4 == 2
-						yield line
-					end
-				end
-			end
-			i = 0
 		else
 			raise "error: not support file_type=#{file_type}, only len or fasta"
 		end
 	end
 
-	def readline(line : String, id : String, seqlen : Int32)
+	def readfaline(line : String, id : String, seqlen : Int32)
 		if line.starts_with?('>')
 			if id != "" || seqlen != 0
 				id_short = id.sub(/^./, "").sub(/\s.*$/, "")
@@ -95,6 +97,18 @@ class FaLen < Admiral::Command
 			seqlen += line.strip.size
 		end
 		return id, seqlen
+	end
+
+	def readfqline(line : String, id : String, line_num : Int32)
+		i = line_num%4
+		if i == 1
+			id = line
+		elsif i == 2
+			puts "#{line.size}\t#{id}"
+		elsif i == 0
+			line_num = 0
+		end
+		return id, line_num
 	end
 
 	def help_when_no_output
