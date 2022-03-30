@@ -1,5 +1,5 @@
 require "admiral"
-require "gzip"
+require "compress/gzip"
 
 
 
@@ -85,7 +85,7 @@ class FaLen < Admiral::Command
 				yield line
 			end
 		elsif file_type == "fasta_gz"
-			Gzip::Reader.open(file) do |gfile|
+			Compress::Gzip::Reader.open(file) do |gfile|
 				gfile.each_line do |line|
 					yield line
 				end
@@ -95,7 +95,7 @@ class FaLen < Admiral::Command
 				yield line
 			end
 		elsif file_type == "fastq_gz"
-			Gzip::Reader.open(file) do |gfile|
+			Compress::Gzip::Reader.open(file) do |gfile|
 				gfile.each_line do |line|
 					yield line
 				end
